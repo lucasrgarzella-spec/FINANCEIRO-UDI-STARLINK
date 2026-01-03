@@ -1,23 +1,25 @@
 {
   "name": "starlink-stock-pro",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Sistema Profissional de Gestão Starlink",
+  "main": "index.tsx",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "npx serve .",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "starlink",
+    "estoque",
+    "vendas",
+    "gestão",
+    "react"
+  ],
+  "author": "UDI Starlink Expert",
+  "license": "MIT",
   "dependencies": {
-    "recharts": "^3.6.0",
-    "lucide-react": "^0.562.0",
-    "react-dom": "^19.2.3",
-    "react": "^19.2.3"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.400.0",
+    "recharts": "^2.12.0"
   }
 }

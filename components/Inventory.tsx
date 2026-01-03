@@ -26,127 +26,102 @@ const Inventory: React.FC<InventoryProps> = ({ products, addProduct, updateProdu
     return matchesSearch && matchesCategory;
   });
 
-  const handleEditProduct = (product: Product) => {
-    setProductToEdit(product);
-  };
-
-  const handleSaveProduct = (product: Product) => {
-    if (productToEdit) {
-      updateProduct(product);
-    } else {
-      addProduct(product);
-    }
-    setShowProductForm(false);
-    setProductToEdit(null);
-  };
-
   return (
     <div className="space-y-6 animate-fadeIn">
       <header className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Estoque</h2>
-          <p className="text-slate-500 text-sm">Gerencie seu catálogo de produtos</p>
+          <h2 className="text-2xl font-black text-white">Inventário</h2>
+          <p className="text-slate-400 text-sm">Controle de equipamentos</p>
         </div>
         <button 
-          onClick={() => {
-            setProductToEdit(null);
-            setShowProductForm(true);
-          }}
-          className="bg-slate-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-md hover:bg-slate-800 transition-colors"
+          onClick={() => { setProductToEdit(null); setShowProductForm(true); }}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg hover:bg-indigo-500 transition-all font-bold"
         >
           {ICONS.Add}
-          <span className="hidden sm:inline">Novo Produto</span>
+          <span>Novo</span>
         </button>
       </header>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
           <input 
             type="text" 
-            placeholder="Buscar por nome ou SKU..." 
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
+            placeholder="Nome ou SKU..." 
+            className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-white placeholder:text-slate-600"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <select 
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
+          className="bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value as any)}
         >
-          <option value="Todos">Todas Categorias</option>
+          <option value="Todos">Categorias</option>
           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </select>
       </div>
 
-      {/* Product List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredProducts.map(product => {
-          const totalInvestment = product.stock * product.purchasePrice;
           const profitMargin = product.purchasePrice > 0 ? ((product.sellPrice - product.purchasePrice) / product.purchasePrice) * 100 : 0;
-
           return (
-            <div key={product.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-              <div className="h-48 bg-slate-100 relative overflow-hidden">
+            <div key={product.id} className="bg-slate-900 rounded-[2rem] border border-slate-800 overflow-hidden shadow-xl hover:border-slate-700 transition-all group">
+              <div className="h-44 bg-slate-800 relative overflow-hidden">
                 {product.images && product.images.length > 0 ? (
-                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <div className="w-full h-full flex items-center justify-center text-slate-700">
                     <Package size={48} />
                   </div>
                 )}
-                <div className="absolute top-2 right-2 flex flex-col gap-2">
-                  <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${
-                    product.stock < 5 ? 'bg-red-500 text-white' : 'bg-slate-900 text-white'
+                <div className="absolute top-4 left-4 right-4 flex justify-between">
+                  <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                    product.stock < 5 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-indigo-600 text-white'
                   }`}>
-                    {product.stock} em estoque
+                    {product.stock} Unid.
                   </span>
-                  <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-slate-700 shadow-sm">
+                  <span className="bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-[9px] font-bold text-white uppercase tracking-widest">
                     {product.category}
                   </span>
                 </div>
               </div>
               
-              <div className="p-4">
+              <div className="p-5">
                 <div className="flex justify-between items-start mb-1">
-                  <h4 className="font-bold text-slate-800 line-clamp-1 flex-1">{product.name}</h4>
-                  <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
-                    profitMargin > 20 ? 'text-green-600 bg-green-50' : 'text-slate-500 bg-slate-50'
-                  }`}>
-                    {profitMargin.toFixed(0)}% Lucro
-                  </span>
+                  <h4 className="font-bold text-white text-lg truncate flex-1 pr-2">{product.name}</h4>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">+{profitMargin.toFixed(0)}%</span>
                 </div>
-                <p className="text-xs text-slate-400 mb-4">SKU: {product.sku}</p>
+                <p className="text-[10px] text-slate-500 mb-4 font-mono">SKU: {product.sku}</p>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold">Venda Un.</p>
-                    <p className="text-md font-bold text-slate-900">R$ {product.sellPrice.toLocaleString()}</p>
+                <div className="grid grid-cols-2 gap-4 mb-5">
+                  <div className="bg-slate-800/50 p-2 rounded-xl">
+                    <p className="text-[9px] text-slate-500 uppercase font-black">Preço Venda</p>
+                    <p className="text-lg font-black text-white">R$ {product.sellPrice.toLocaleString()}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-slate-400 uppercase font-bold">Investido</p>
-                    <p className="text-md font-bold text-slate-600">R$ {totalInvestment.toLocaleString()}</p>
+                  <div className="bg-slate-800/50 p-2 rounded-xl">
+                    <p className="text-[9px] text-slate-500 uppercase font-black">Custo</p>
+                    <p className="text-lg font-black text-slate-400">R$ {product.purchasePrice.toLocaleString()}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setShowStockForm(product)}
-                    className="flex-[2] py-2 bg-slate-900 text-white font-semibold text-xs rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-3 bg-white text-slate-900 font-black text-[10px] uppercase rounded-xl hover:bg-slate-200 transition-all"
                   >
-                    {ICONS.Add} Entrada
+                    Entrada
                   </button>
                   <button 
-                    onClick={() => handleEditProduct(product)}
-                    className="flex-1 py-2 bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-1"
+                    onClick={() => setProductToEdit(product)}
+                    className="p-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all"
                   >
-                    {ICONS.Edit} Editar
+                    {ICONS.Edit}
                   </button>
                   <button 
                     onClick={() => deleteProduct(product.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-3 text-rose-500 bg-rose-500/10 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
                   >
                     {ICONS.Delete}
                   </button>
@@ -157,21 +132,11 @@ const Inventory: React.FC<InventoryProps> = ({ products, addProduct, updateProdu
         })}
       </div>
 
-      {filteredProducts.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-          <p className="text-slate-400">Nenhum produto encontrado.</p>
-        </div>
-      )}
-
-      {/* Modals */}
       {(showProductForm || productToEdit) && (
         <ProductForm 
           initialProduct={productToEdit || undefined}
-          onClose={() => {
-            setShowProductForm(false);
-            setProductToEdit(null);
-          }} 
-          onSave={handleSaveProduct} 
+          onClose={() => { setShowProductForm(false); setProductToEdit(null); }} 
+          onSave={(p) => { productToEdit ? updateProduct(p) : addProduct(p); setShowProductForm(false); setProductToEdit(null); }} 
         />
       )}
 
@@ -179,10 +144,7 @@ const Inventory: React.FC<InventoryProps> = ({ products, addProduct, updateProdu
         <StockLogForm 
           product={showStockForm}
           onClose={() => setShowStockForm(null)}
-          onSave={(log) => {
-            addStockLog(log);
-            setShowStockForm(null);
-          }}
+          onSave={(log) => { addStockLog(log); setShowStockForm(null); }}
         />
       )}
     </div>

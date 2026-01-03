@@ -18,14 +18,10 @@ const SaleForm: React.FC<SaleFormProps> = ({ products, onClose, onSave }) => {
   const [customerName, setCustomerName] = useState('');
   const [proofPhoto, setProofPhoto] = useState<string | undefined>();
 
-  const selectedProduct = useMemo(() => 
-    products.find(p => p.id === productId), [products, productId]
-  );
+  const selectedProduct = useMemo(() => products.find(p => p.id === productId), [products, productId]);
 
   React.useEffect(() => {
-    if (selectedProduct) {
-      setSoldPrice(selectedProduct.sellPrice);
-    }
+    if (selectedProduct) setSoldPrice(selectedProduct.sellPrice);
   }, [selectedProduct]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,20 +36,14 @@ const SaleForm: React.FC<SaleFormProps> = ({ products, onClose, onSave }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct) return;
-
     if (quantity > selectedProduct.stock) {
       alert(`Erro: Estoque insuficiente! (Disponível: ${selectedProduct.stock})`);
       return;
     }
-
-    // O total que o cliente paga (Apenas os produtos)
     const total = soldPrice * quantity;
-    
-    // O lucro leva em conta o custo do produto e o frete que VOCÊ pagou
-    const totalPurchaseCost = selectedProduct.purchasePrice * quantity;
-    const profit = total - totalPurchaseCost - shippingCost;
+    const profit = total - (selectedProduct.purchasePrice * quantity) - shippingCost;
 
-    const newSale: Sale = {
+    onSave({
       id: Date.now().toString(),
       productId,
       productName: selectedProduct.name,
@@ -66,140 +56,76 @@ const SaleForm: React.FC<SaleFormProps> = ({ products, onClose, onSave }) => {
       customerName,
       date: new Date().toISOString(),
       proofPhoto
-    };
-
-    onSave(newSale);
+    });
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl animate-scaleIn">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[70] flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl animate-scaleIn">
+        <div className="p-8 border-b border-slate-800 bg-emerald-600 text-white flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-bold">Registrar Venda</h3>
-            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">O frete será descontado do seu lucro</p>
+            <h3 className="text-2xl font-black uppercase tracking-tight">Nova Venda</h3>
+            <p className="text-[10px] font-black uppercase opacity-60 tracking-widest mt-1">Baixa automática no estoque</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full transition-colors">✕</button>
+          <button onClick={onClose} className="p-3 hover:bg-black/10 rounded-full transition-colors">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1 overflow-y-auto max-h-[80vh]">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase">Produto</label>
-            <select 
-              required
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
-              value={productId}
-              onChange={e => setProductId(e.target.value)}
-            >
-              <option value="">Selecione um produto</option>
-              {products.map(p => (
-                <option key={p.id} value={p.id} disabled={p.stock <= 0}>
-                  {p.name} ({p.stock} em estoque)
-                </option>
-              ))}
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 flex-1 overflow-y-auto max-h-[75vh]">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Equipamento</label>
+            <select required className="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={productId} onChange={e => setProductId(e.target.value)}>
+              <option value="">Selecione...</option>
+              {products.map(p => <option key={p.id} value={p.id} disabled={p.stock <= 0}>{p.name} ({p.stock} un.)</option>)}
             </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Quantidade</label>
-              <input 
-                type="number"
-                min="1"
-                required
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
-                value={quantity}
-                onChange={e => setQuantity(parseInt(e.target.value) || 1)}
-              />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Qtd</label>
+              <input type="number" min="1" required className="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Preço de Venda (un.)</label>
-              <input 
-                type="number"
-                step="0.01"
-                required
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
-                value={soldPrice}
-                onChange={e => setSoldPrice(parseFloat(e.target.value) || 0)}
-              />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Preço Venda</label>
+              <input type="number" step="0.01" required className="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500" value={soldPrice} onChange={e => setSoldPrice(parseFloat(e.target.value) || 0)} />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase">Custo de Envio / Frete (Pago por Você)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 font-bold">-</span>
-              <input 
-                type="number"
-                step="0.01"
-                className="w-full p-3 pl-8 bg-red-50 border border-red-100 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-slate-900"
-                value={shippingCost}
-                onChange={e => setShippingCost(parseFloat(e.target.value) || 0)}
-                placeholder="0,00"
-              />
-            </div>
-            <p className="text-[10px] text-red-500 font-bold uppercase tracking-tight">* Este valor reduz o seu lucro final.</p>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Frete / Despesas (Reduz lucro)</label>
+            <input type="number" step="0.01" className="w-full p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 outline-none focus:ring-2 focus:ring-rose-500" value={shippingCost} onChange={e => setShippingCost(parseFloat(e.target.value) || 0)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Pagamento</label>
-              <select 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
-                value={paymentMethod}
-                onChange={e => setPaymentMethod(e.target.value)}
-              >
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pagamento / Cliente</label>
+            <div className="flex gap-4">
+              <select className="flex-1 p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
                 {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
               </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Cliente</label>
-              <input 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-900"
-                value={customerName}
-                onChange={e => setCustomerName(e.target.value)}
-                placeholder="Opcional"
-              />
+              <input className="flex-1 p-4 bg-slate-800 border border-slate-700 rounded-2xl text-white outline-none" placeholder="Nome Cliente" value={customerName} onChange={e => setCustomerName(e.target.value)} />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase">Comprovante</label>
-            <label className="w-full p-3 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:border-slate-900 hover:text-slate-900 cursor-pointer transition-all">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Anexar Comprovante / Foto Entrega</label>
+            <label className="w-full p-4 border-2 border-dashed border-slate-800 rounded-2xl flex items-center justify-center gap-3 text-slate-500 hover:text-white hover:border-slate-500 cursor-pointer bg-slate-800/30 transition-all">
               {ICONS.Camera}
-              <span className="text-sm font-semibold">{proofPhoto ? 'Imagem Capturada' : 'Adicionar Foto'}</span>
+              <span className="text-xs font-black uppercase">{proofPhoto ? 'Imagem Ok' : 'Tirar Foto'}</span>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           </div>
 
-          <div className="bg-slate-50 p-5 rounded-2xl space-y-2 border border-slate-200">
+          <div className="bg-black/40 p-6 rounded-[2rem] border border-slate-800 space-y-3 shadow-inner">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total do Cliente:</span>
-              <span className="text-xl font-black text-slate-900">R$ {(soldPrice * quantity).toLocaleString()}</span>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bruto Cliente</span>
+              <span className="text-xl font-black text-white">R$ {(soldPrice * quantity).toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-              <span className="text-xs font-bold text-green-600 uppercase tracking-wider">Seu Lucro Líquido:</span>
-              <span className="text-xl font-black text-green-600">
-                R$ {selectedProduct ? ((soldPrice - selectedProduct.purchasePrice) * quantity - shippingCost).toLocaleString() : '0'}
-              </span>
+            <div className="flex justify-between items-center pt-3 border-t border-slate-800">
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Lucro Líquido Real</span>
+              <span className="text-2xl font-black text-emerald-400">R$ {selectedProduct ? ((soldPrice - selectedProduct.purchasePrice) * quantity - shippingCost).toLocaleString() : '0'}</span>
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button 
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-2xl transition-colors"
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit"
-              className="flex-1 py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-xl hover:bg-slate-800 transition-all active:scale-95"
-            >
-              Confirmar Venda
-            </button>
-          </div>
+          <button type="submit" className="w-full py-5 bg-white text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-2xl hover:bg-slate-200 transition-all active:scale-[0.98]">Confirmar Transação</button>
         </form>
       </div>
     </div>
