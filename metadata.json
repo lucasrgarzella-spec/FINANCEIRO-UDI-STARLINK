@@ -1,7 +1,16 @@
 {
   "name": "Starlink Stock Pro",
+  "short_name": "StarlinkPro",
+  "version": "1.0.0",
   "description": "Aplicativo profissional para gestão de estoque e vendas de produtos Starlink com suporte a fotos e relatórios financeiros.",
   "requestFramePermissions": [
     "camera"
+  ],
+  "author": "Expert Senior Frontend Engineer",
+  "license": "MIT",
+  "categories": [
+    "Business",
+    "Finance",
+    "Productivity"
   ]
 }
